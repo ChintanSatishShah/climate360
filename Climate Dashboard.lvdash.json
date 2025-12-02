@@ -1,0 +1,2193 @@
+{
+  "datasets": [
+    {
+      "name": "54b82d82",
+      "displayName": "gold_air_daily",
+      "queryLines": [
+        "SELECT * FROM env_catalog.env_data.gold_air_daily"
+      ]
+    },
+    {
+      "name": "ca850499",
+      "displayName": "city_master",
+      "queryLines": [
+        "SELECT * FROM env_catalog.env_data.city_master"
+      ]
+    },
+    {
+      "name": "5df36c01",
+      "displayName": "silver_air_daily",
+      "queryLines": [
+        "SELECT \n",
+        "  sad.*,\n",
+        "  dd.*,\n",
+        "  cm.country_code,\n",
+        "  cm.country_name,\n",
+        "  cm.region\n",
+        "FROM env_catalog.env_data.silver_air_daily sad\n",
+        "INNER JOIN dim_date dd \n",
+        "  ON dd.date_full = sad.data_timestamp\n",
+        "INNER JOIN env_catalog.env_data.city_master cm\n",
+        "  ON cm.dim_key = sad.dim_key\n"
+      ]
+    },
+    {
+      "name": "3354f3da",
+      "displayName": "gold_weather_daily",
+      "queryLines": [
+        "SELECT * FROM env_catalog.env_data.gold_weather_daily"
+      ]
+    },
+    {
+      "name": "aa734796",
+      "displayName": "silver_weather_daily",
+      "queryLines": [
+        "SELECT * FROM env_catalog.env_data.silver_weather_daily"
+      ]
+    },
+    {
+      "name": "03c6f2b6",
+      "displayName": "dim_date",
+      "queryLines": [
+        "SELECT * FROM workspace.default.dim_date"
+      ]
+    },
+    {
+      "name": "5438f93b",
+      "displayName": "gold_mv_climate_risk",
+      "queryLines": [
+        "SELECT * FROM env_catalog.env_data.gold_mv_climate_risk"
+      ]
+    },
+    {
+      "name": "51ae33a7",
+      "displayName": "Filter check",
+      "queryLines": [
+        "SELECT :`Date Range.start` AS start_date\n",
+        ", :`Date Range.end` AS end_date\n",
+        ", :Cities AS cities"
+      ],
+      "parameters": [
+        {
+          "displayName": "Cities",
+          "keyword": "Cities",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "Ahmedabad,Amsterdam"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "Date Range.end",
+          "keyword": "Date Range.end",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "2025-01-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "Date Range.start",
+          "keyword": "Date Range.start",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "2025-02-01"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "65ea0680",
+      "displayName": "Sample",
+      "queryLines": [
+        "SELECT \n",
+        "  swd.*,\n",
+        "  dd.*, \n",
+        "  cm.country_code,\n",
+        "  cm.country_name,\n",
+        "  cm.region\n",
+        "  , sad.* \n",
+        "  , gwd.*\n",
+        "  , gad.*\n",
+        "  , gcr.*\n",
+        "FROM env_catalog.env_data.gold_mv_climate_risk gcr\n",
+        "INNER JOIN dim_date dd \n",
+        "  ON dd.date_full = gcr.data_timestamp\n",
+        "INNER JOIN env_catalog.env_data.city_master cm\n",
+        "  ON cm.dim_key = gcr.dim_key\n",
+        "INNER JOIN env_catalog.env_data.silver_weather_daily swd\n",
+        "  ON dd.date_full = swd.data_timestamp\n",
+        "  AND cm.dim_key = swd.dim_key\n",
+        "INNER JOIN env_catalog.env_data.silver_air_daily sad\n",
+        "  ON dd.date_full = sad.data_timestamp\n",
+        "  AND cm.dim_key = sad.dim_key\n",
+        "INNER JOIN env_catalog.env_data.gold_weather_daily gwd\n",
+        "  ON dd.date_full = gwd.data_timestamp\n",
+        "  AND cm.dim_key = gwd.dim_key\n",
+        "INNER JOIN env_catalog.env_data.gold_air_daily gad\n",
+        "  ON dd.date_full = gad.data_timestamp\n",
+        "  AND cm.dim_key = gad.dim_key\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "2cee80d0",
+      "displayName": "Climate",
+      "layout": [
+        {
+          "widget": {
+            "name": "10bee76a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "aa734796",
+                  "fields": [
+                    {
+                      "name": "daily(data_timestamp)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data_timestamp`)"
+                    },
+                    {
+                      "name": "avg(apparent_temperature_max)",
+                      "expression": "AVG(`apparent_temperature_max`)"
+                    },
+                    {
+                      "name": "avg(precipitation_hours)",
+                      "expression": "AVG(`precipitation_hours`)"
+                    },
+                    {
+                      "name": "avg(relative_humidity_2m_max)",
+                      "expression": "AVG(`relative_humidity_2m_max`)"
+                    },
+                    {
+                      "name": "avg(climate_index)",
+                      "expression": "AVG(`climate_index`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(data_timestamp)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "avg(apparent_temperature_max)"
+                    },
+                    {
+                      "fieldName": "avg(precipitation_hours)"
+                    },
+                    {
+                      "fieldName": "avg(relative_humidity_2m_max)"
+                    },
+                    {
+                      "fieldName": "avg(climate_index)"
+                    }
+                  ],
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Key Weather params"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "44f89b7f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "3354f3da",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "daily(data_timestamp)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data_timestamp`)"
+                    },
+                    {
+                      "name": "avg(climate_index)",
+                      "expression": "AVG(`climate_index`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(data_timestamp)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(climate_index)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Climate Trends",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "fcdebe9c",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521c21394a830a389bb5682d2_data_timestamp",
+                "query": {
+                  "datasetName": "3354f3da",
+                  "fields": [
+                    {
+                      "name": "data_timestamp",
+                      "expression": "`data_timestamp`"
+                    },
+                    {
+                      "name": "data_timestamp_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "data_timestamp",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521c21394a830a389bb5682d2_data_timestamp"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date Range"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "DATETIME",
+                    "min": {
+                      "value": "2025-11-01T00:00:00.000"
+                    },
+                    "max": {
+                      "value": "2025-11-20T00:54:00.999"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "2d2e094a",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521c21394a830a389bb5682d2_city",
+                "query": {
+                  "datasetName": "3354f3da",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521c21394a830a389bb5682d2_city"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cities"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "New York"
+                      },
+                      {
+                        "value": "Mumbai"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e7152228",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521c21394a830a389bb5682d2_climate_index",
+                "query": {
+                  "datasetName": "3354f3da",
+                  "fields": [
+                    {
+                      "name": "min(climate_index)",
+                      "expression": "MIN(`climate_index`)"
+                    },
+                    {
+                      "name": "max(climate_index)",
+                      "expression": "MAX(`climate_index`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "climate_index",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521c21394a830a389bb5682d2_climate_index"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Climate Index"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "62de3bf0",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "aa734796",
+                  "fields": [
+                    {
+                      "name": "count(weather_code)",
+                      "expression": "COUNT(`weather_code`)"
+                    },
+                    {
+                      "name": "weather_description",
+                      "expression": "`weather_description`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(weather_code)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Weather Type"
+                },
+                "color": {
+                  "fieldName": "weather_description",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "legend": {
+                    "title": "Weather Type",
+                    "position": "right"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "title": "Weather Type Distribution",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "eee122f5",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "aa734796",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(temperature_2m_mean)",
+                      "expression": "AVG(`temperature_2m_mean`)"
+                    },
+                    {
+                      "name": "avg(apparent_temperature_max)",
+                      "expression": "AVG(`apparent_temperature_max`)"
+                    },
+                    {
+                      "name": "max(temperature_2m_max)",
+                      "expression": "MAX(`temperature_2m_max`)"
+                    },
+                    {
+                      "name": "max(apparent_temperature_max)",
+                      "expression": "MAX(`apparent_temperature_max`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "avg(temperature_2m_mean)"
+                    },
+                    {
+                      "fieldName": "avg(apparent_temperature_max)"
+                    },
+                    {
+                      "fieldName": "max(temperature_2m_max)"
+                    },
+                    {
+                      "fieldName": "max(apparent_temperature_max)"
+                    }
+                  ]
+                }
+              },
+              "frame": {
+                "title": "Average Temperature by City",
+                "showTitle": true
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "61ec2473",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115220d17cb916fe39418e172dc_data_timestamp",
+                "query": {
+                  "datasetName": "aa734796",
+                  "fields": [
+                    {
+                      "name": "data_timestamp",
+                      "expression": "`data_timestamp`"
+                    },
+                    {
+                      "name": "data_timestamp_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "data_timestamp",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115220d17cb916fe39418e172dc_data_timestamp"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date Range"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "7fd547a9",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115220d17cb916fe39418e172dc_city",
+                "query": {
+                  "datasetName": "aa734796",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115220d17cb916fe39418e172dc_city"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cities"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "Mumbai"
+                      },
+                      {
+                        "value": "New York"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "131b1354",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115220d17cb916fe39418e172dc_climate_label",
+                "query": {
+                  "datasetName": "aa734796",
+                  "fields": [
+                    {
+                      "name": "climate_label",
+                      "expression": "`climate_label`"
+                    },
+                    {
+                      "name": "climate_label_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "climate_label",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115220d17cb916fe39418e172dc_climate_label"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Climate Type"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "efd76a1f",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "730b9a1e",
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": []
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date Range",
+                "showDescription": true,
+                "description": "Observation Data - Date Range"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "68d95d4b",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115212d1855b1e7fef45bbf232d_city_name",
+                "query": {
+                  "datasetName": "ca850499",
+                  "fields": [
+                    {
+                      "name": "city_name",
+                      "expression": "`city_name`"
+                    },
+                    {
+                      "name": "city_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city_name",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c115212d1855b1e7fef45bbf232d_city_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Cities"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    },
+    {
+      "name": "c9fe11e1",
+      "displayName": "Air Quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "0141ccc3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5df36c01",
+                  "fields": [
+                    {
+                      "name": "daily(data_timestamp)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data_timestamp`)"
+                    },
+                    {
+                      "name": "avg(pm10_max)",
+                      "expression": "AVG(`pm10_max`)"
+                    },
+                    {
+                      "name": "avg(pm2_5_max)",
+                      "expression": "AVG(`pm2_5_max`)"
+                    },
+                    {
+                      "name": "avg(nitrogen_dioxide_max)",
+                      "expression": "AVG(`nitrogen_dioxide_max`)"
+                    },
+                    {
+                      "name": "avg(ozone_max)",
+                      "expression": "AVG(`ozone_max`)"
+                    },
+                    {
+                      "name": "avg(sulphur_dioxide_max)",
+                      "expression": "AVG(`sulphur_dioxide_max`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(data_timestamp)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "avg(pm10_max)"
+                    },
+                    {
+                      "fieldName": "avg(pm2_5_max)"
+                    },
+                    {
+                      "fieldName": "avg(nitrogen_dioxide_max)"
+                    },
+                    {
+                      "fieldName": "avg(ozone_max)"
+                    },
+                    {
+                      "fieldName": "avg(sulphur_dioxide_max)"
+                    }
+                  ]
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Key Weather params"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "selectionColor"
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  "#CCC311",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "f7718671",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "54b82d82",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "daily(data_timestamp)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data_timestamp`)"
+                    },
+                    {
+                      "name": "sum(aqi_value)",
+                      "expression": "SUM(`aqi_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(data_timestamp)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(aqi_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "frame": {
+                "title": "Climate Trends",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "6d3ccf68",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11520ce1dc49180e83ae4061969_data_timestamp",
+                "query": {
+                  "datasetName": "54b82d82",
+                  "fields": [
+                    {
+                      "name": "data_timestamp",
+                      "expression": "`data_timestamp`"
+                    },
+                    {
+                      "name": "data_timestamp_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "data_timestamp",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11520ce1dc49180e83ae4061969_data_timestamp"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date Range"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "DATETIME",
+                    "min": {
+                      "value": "2025-11-01T00:00:00.000"
+                    },
+                    "max": {
+                      "value": "2025-11-20T00:00:58.999"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e5d91828",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11520ce1dc49180e83ae4061969_city",
+                "query": {
+                  "datasetName": "54b82d82",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11520ce1dc49180e83ae4061969_city"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cities"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "Mumbai"
+                      },
+                      {
+                        "value": "New York"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "795d76ce",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11520ce1dc49180e83ae4061969_aqi_value",
+                "query": {
+                  "datasetName": "54b82d82",
+                  "fields": [
+                    {
+                      "name": "min(aqi_value)",
+                      "expression": "MIN(`aqi_value`)"
+                    },
+                    {
+                      "name": "max(aqi_value)",
+                      "expression": "MAX(`aqi_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "aqi_value",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11520ce1dc49180e83ae4061969_aqi_value"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "AQI"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "5ed3c516",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5df36c01",
+                  "fields": [
+                    {
+                      "name": "count(aqi_category)",
+                      "expression": "COUNT(`aqi_category`)"
+                    },
+                    {
+                      "name": "aqi_color",
+                      "expression": "`aqi_color`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(aqi_category)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "AQI Category"
+                },
+                "color": {
+                  "fieldName": "aqi_color",
+                  "legend": {
+                    "title": "Weather Type",
+                    "position": "right"
+                  },
+                  "displayName": "AQI Level",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Yellow",
+                        "color": "#EEE833"
+                      },
+                      {
+                        "value": "Orange",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 1
+                        }
+                      },
+                      {
+                        "value": "Red",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "Green",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 6
+                        }
+                      },
+                      {
+                        "value": "Purple",
+                        "color": {
+                          "themeColorType": "selectionColor"
+                        }
+                      },
+                      {
+                        "value": "Maroon",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 5
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "title": "AQI Distribution",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "32af20ca",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5df36c01",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(aqi_value)",
+                      "expression": "AVG(`aqi_value`)"
+                    },
+                    {
+                      "name": "avg(european_aqi_max)",
+                      "expression": "AVG(`european_aqi_max`)"
+                    },
+                    {
+                      "name": "avg(us_aqi_max)",
+                      "expression": "AVG(`us_aqi_max`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "avg(aqi_value)"
+                    },
+                    {
+                      "fieldName": "avg(european_aqi_max)"
+                    },
+                    {
+                      "fieldName": "avg(us_aqi_max)"
+                    }
+                  ]
+                }
+              },
+              "frame": {
+                "title": "Average AQI by City",
+                "showTitle": true
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c53f376b",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521791784a199ff7edce345ee_data_timestamp",
+                "query": {
+                  "datasetName": "5df36c01",
+                  "fields": [
+                    {
+                      "name": "data_timestamp",
+                      "expression": "`data_timestamp`"
+                    },
+                    {
+                      "name": "data_timestamp_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "data_timestamp",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521791784a199ff7edce345ee_data_timestamp"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date Range"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "DATETIME",
+                    "min": {
+                      "value": "2025-11-01T00:00:00.000"
+                    },
+                    "max": {
+                      "value": "2025-11-20T00:31:08.999"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "a89e8f4f",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521791784a199ff7edce345ee_city",
+                "query": {
+                  "datasetName": "5df36c01",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521791784a199ff7edce345ee_city"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cities"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "Mumbai"
+                      },
+                      {
+                        "value": "New York"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "f3f8b073",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521791784a199ff7edce345ee_aqi_category",
+                "query": {
+                  "datasetName": "5df36c01",
+                  "fields": [
+                    {
+                      "name": "aqi_category",
+                      "expression": "`aqi_category`"
+                    },
+                    {
+                      "name": "aqi_category_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "aqi_category",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11521791784a199ff7edce345ee_aqi_category"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "AQI"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "66297bca",
+      "displayName": "Overall Risk",
+      "layout": [
+        {
+          "widget": {
+            "name": "74af03c6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "daily(data_timestamp)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data_timestamp`)"
+                    },
+                    {
+                      "name": "avg(aqi_scaled)",
+                      "expression": "AVG(`aqi_scaled`)"
+                    },
+                    {
+                      "name": "avg(climate_risk)",
+                      "expression": "AVG(`climate_risk`)"
+                    },
+                    {
+                      "name": "avg(risk_index)",
+                      "expression": "AVG(`risk_index`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(data_timestamp)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "avg(aqi_scaled)"
+                    },
+                    {
+                      "fieldName": "avg(climate_risk)"
+                    },
+                    {
+                      "fieldName": "avg(risk_index)"
+                    }
+                  ]
+                },
+                "color": {
+                  "legend": {
+                    "position": "bottom"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Risk Index Trends"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "selectionColor"
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "8d22bc38",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "daily(data_timestamp)",
+                      "expression": "DATE_TRUNC(\"DAY\", `data_timestamp`)"
+                    },
+                    {
+                      "name": "sum(aqi_value)",
+                      "expression": "SUM(`aqi_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(data_timestamp)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(aqi_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "frame": {
+                "title": "Climate Trends",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "773acf79",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_data_timestamp",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "data_timestamp",
+                      "expression": "`data_timestamp`"
+                    },
+                    {
+                      "name": "data_timestamp_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "data_timestamp",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_data_timestamp"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Date Range"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "DATE",
+                    "min": {
+                      "value": "2025-11-01T00:00:00.000"
+                    },
+                    "max": {
+                      "value": "2025-11-18T23:59:59.999"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "0605fb23",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_city",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "city_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "city",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_city"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Cities"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "STRING",
+                    "values": [
+                      {
+                        "value": "Mumbai"
+                      },
+                      {
+                        "value": "New York"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "f82edbb3",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_climate_risk",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "min(climate_risk)",
+                      "expression": "MIN(`climate_risk`)"
+                    },
+                    {
+                      "name": "max(climate_risk)",
+                      "expression": "MAX(`climate_risk`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "climate_risk",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_climate_risk"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Risk Index"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 1,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "54e4c1b7",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "count(risk_category)",
+                      "expression": "COUNT(`risk_category`)"
+                    },
+                    {
+                      "name": "risk_color",
+                      "expression": "`risk_color`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(risk_category)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Risk Category"
+                },
+                "color": {
+                  "fieldName": "risk_color",
+                  "legend": {
+                    "title": "Weather Type",
+                    "position": "right"
+                  },
+                  "displayName": "Risk Level",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Yellow",
+                        "color": "#EEE833"
+                      },
+                      {
+                        "value": "Orange",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 1
+                        }
+                      },
+                      {
+                        "value": "Red",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "Green",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 6
+                        }
+                      },
+                      {
+                        "value": "Purple",
+                        "color": {
+                          "themeColorType": "selectionColor"
+                        }
+                      },
+                      {
+                        "value": "Maroon",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 5
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "title": "Risk Distribution",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "55b21f69",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "city",
+                      "expression": "`city`"
+                    },
+                    {
+                      "name": "avg(aqi_scaled)",
+                      "expression": "AVG(`aqi_scaled`)"
+                    },
+                    {
+                      "name": "avg(climate_risk)",
+                      "expression": "AVG(`climate_risk`)"
+                    },
+                    {
+                      "name": "avg(risk_index)",
+                      "expression": "AVG(`risk_index`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "city",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "avg(aqi_scaled)"
+                    },
+                    {
+                      "fieldName": "avg(climate_risk)"
+                    },
+                    {
+                      "fieldName": "avg(risk_index)"
+                    }
+                  ]
+                }
+              },
+              "frame": {
+                "title": "Average Indexes by City",
+                "showTitle": true
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "selectionColor"
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  }
+                ],
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 7,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "da09764b",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_risk_category",
+                "query": {
+                  "datasetName": "5438f93b",
+                  "fields": [
+                    {
+                      "name": "risk_category",
+                      "expression": "`risk_category`"
+                    },
+                    {
+                      "name": "risk_category_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "risk_category",
+                    "queryName": "dashboards/01f0c0ab19051e6e8e7e85b8bd867f2a/datasets/01f0c11863c31683ac84dcdc9a8ff27c_risk_category"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Risk Category"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 2,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "locale": "en-US",
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+      },
+      "widgetBorderColor": {
+        "light": "#000000",
+        "dark": "#00FF00"
+      },
+      "fontColor": {
+        "light": "#000000",
+        "dark": "#00FF00"
+      },
+      "selectionColor": {
+        "light": "#FF00FF",
+        "dark": "#FFFFFF"
+      },
+      "visualizationColors": [
+        "#EE7733",
+        "#0077BB",
+        "#33BBEE",
+        "#EE3377",
+        "#CC3311",
+        "#009988",
+        "#BBBBBB"
+      ],
+      "widgetHeaderAlignment": "LEFT"
+    },
+    "genieSpace": {
+      "isEnabled": true
+    },
+    "applyModeEnabled": false
+  }
+}
